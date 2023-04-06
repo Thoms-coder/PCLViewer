@@ -1,4 +1,4 @@
-import React, { Component, useRef, useMemo, useEffect } from 'react'
+import React, { Component, useRef, useMemo, useEffect, useState } from 'react'
 
 import { a } from 'react-spring/three'
 import { useSpring } from 'react-spring'
@@ -25,41 +25,7 @@ function OrbitControlsComponent() {
   return <orbitControls ref={ref} args={[camera]} enableDamping dampingFactor={0.1} rotateSpeed={1} />
 }
 
-const getNewVertices = ({ widthDensity, depthDensity, mountainVariation, geometrySize, heightMultiplier }) => {
-  const data = generateHeight(widthDensity, depthDensity, mountainVariation)
-
-  const geometry = new THREE.PlaneBufferGeometry(geometrySize, geometrySize, widthDensity - 1, depthDensity - 1)
-  geometry.rotateX(-Math.PI / 2)
-  const vertices = geometry.attributes.position.array
-
-  const updatedVertices = []
-
-  for (let i = 0, j = 0, l = vertices.length; i < l; i++, j += 3) {
-    vertices[j + 1] = data[i] * heightMultiplier
-    updatedVertices.push(vertices[i])
-  }
-
-  return updatedVertices
-}
-
 function Dots() {
-
-  // const vertices = useMemo(() => {
-  //   return getNewVertices({ geometrySize, widthDensity, depthDensity, heightMultiplier, mountainVariation })
-  // }, [geometrySize, widthDensity, depthDensity, heightMultiplier, mountainVariation])
-
-  // My goal is to use Spring to interpolate between different 'mountain variations'
-  // perhaps factor here could be
-  // const { factor } = useSpring({
-  //   config: { mass: 5, tension: 500, friction: 40 },
-  //   from: { factor: getNewVertices({ geometrySize, widthDensity, depthDensity, heightMultiplier, mountainVariation: 0 }) },
-  //   to: async next => {
-  //     while (true) {
-  //       await next({ factor: getNewVertices({ geometrySize, widthDensity, depthDensity, heightMultiplier, mountainVariation: 1 }) })
-  //       await next({ factor: getNewVertices({ geometrySize, widthDensity, depthDensity, heightMultiplier, mountainVariation: 2 }) })
-  //     }
-  //   }
-  // })
 
   const geometry = new THREE.BufferGeometry();
   // const renderer = new THREE.WebGLRenderer();
@@ -72,102 +38,147 @@ function Dots() {
 
   // const scene = new THREE.Scene();
 
-  const vertices = [];
-  const colors = [];
+  // const [number, setNumber] = useState(0);
+  const [vertices, setVertices] = useState([]);
+  const [colors, setColors] = useState([]);
   const sizes = [];
-  const hexa = Math.floor(Math.random()*16777215).toString(16);
+  const scene = new THREE.Scene();
+  // const renderer = new THREE.WebGLRenderer();
+  // document.body.appendChild(renderer.domElement);
+  const hexa = Math.floor(Math.random() * 16777215).toString(16);
+  const vx = THREE.Math.randInt(0, 1);
+  const vy = THREE.Math.randInt(0, 1);
+  const vz = THREE.Math.randInt(0, 1);
 
-  for (let i = 0; i < 5000; i++) {
+  // for (let i = 0; i < 5000; i++) {
 
-    //vertices
-    const x = THREE.Math.randFloatSpread(5000);
-    const y = THREE.Math.randFloatSpread(5000);
-    const z = THREE.Math.randFloatSpread(5000);
+  //   //vertices
+  //   const x = THREE.Math.randFloatSpread(5000);
+  //   const y = THREE.Math.randFloatSpread(5000);
+  //   const z = THREE.Math.randFloatSpread(5000);
 
-    vertices.push(x, y, z);
+  //   vertices.push(x, y, z);
 
-    //colors
-    const vx = THREE.Math.randInt(0, 1);
-    const vy = THREE.Math.randInt(0, 1);
-    const vz = THREE.Math.randInt(0, 1);
+  //   //colors
 
-    colors.push(vx, vy, vz);
+  //   colors.push(vx, vy, vz);
 
-    const size = THREE.Math.randInt(5, 50);
+  //   const size = THREE.Math.randInt(5, 50);
 
-    sizes.push(size);
+  //   sizes.push(size);
 
-  }
-  console.log("WOOW! ", vertices);
-  console.log("WAAW! ", colors);
+  // }
+  // // console.log("WOOW! ", vertices);
+  // // console.log("WAAW! ", colors);
+  console.log("wat ?", geometry);
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
   geometry.setAttribute('color', new THREE.Uint8BufferAttribute(colors, 3));
-  geometry.computeBoundingBox();
+  // geometry.computeBoundingBox();
 
-  const material = new THREE.PointsMaterial({ size: 10, vertexColors:true, toneMapped:false  });
+  const material = new THREE.PointsMaterial({ size: 10, vertexColors: true, toneMapped: false });
 
-  const points = new THREE.Points(geometry, material);
+  // const points = new THREE.Points(geometry, material);
+  // scene.add(points);
 
   // itemSize = 3 because there are 3 values (components) per vertex
   // geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
   // const material = new THREE.MeshBasicMaterial( { color: dotColor} );
   // const mesh = new THREE.Mesh( geometry, material );
+  // function animate() {
+  //   requestAnimationFrame( animate );
 
-  useEffect(() => {
-    if (vertices) {
-      console.log("What is that ?" + '\n', vertices)
-      console.log("and this ?" + '\n', colors)
-      // while (42) {
+  // for (let i = 0; i < 5000; i++) {
 
-      //   const x = THREE.Math.randFloatSpread( 2000 );
-      //   const y = THREE.Math.randFloatSpread( 2000 );
-      //   const z = THREE.Math.randFloatSpread( 2000 );
+  //   points.rotation.x += 0.1;
+  //   points.rotation.y += 0.1;
 
-      //   vertices.push( x, y, z );
+  //   renderer.render( scene, camera );
+  // }}
 
-      // }
-    }
-  }, [vertices, colors])
+  // animate();
 
-  return (
-    <points
-      geometry={geometry}
-      material={material}
-    >
-      <bufferGeometry attach="geometry">
-        <a.bufferAttribute
-          attachObject={['attributes', 'position']}
-          count={vertices.length / 3}
-          // this renders the dots fine
-          array={new Float32Array(vertices)}
-          // but I can't get the interpolated values to work
-          // might be because bufferAttribute must accept a typed array?
-          // array={new Float32Array(factor)}
-          itemSize={3}
-          onUpdate={self => {
-            self.needsUpdate = true
-            self.verticesNeedUpdate = true
-          }}
-        />
-        <a.bufferAttribute
-          attachObject={['attributes', 'color']}
-          count={colors.length / 3}
-          // this renders the dots fine
-          array={new Uint8Array(colors)}
-          // but I can't get the interpolated values to work
-          // might be because bufferAttribute must accept a typed array?
-          // array={new Float32Array(factor)}
-          itemSize={3}
-          onUpdate={self => {
-            self.needsUpdate = true
-            self.verticesNeedUpdate = true
-          }}
-        />
-      </bufferGeometry>
+  const handleKeyUp = (e) => {
+    if (e.key === "Enter") {
+      // console.log("NUUUMBEEERRRR!!!!!!!!!!!",number);
+      // setNumber(number + 1);
+      let tab =[];
+      let col =[];
+      let randx = THREE.Math.randInt(0, 1);
+      let randy = THREE.Math.randInt(0, 1);
+      let randz = THREE.Math.randInt(0, 1);
+        for(let i = 0; i< 5000; i++) {
+          
+          //vertices
+          const x = THREE.Math.randFloatSpread(5000);
+          const y = THREE.Math.randFloatSpread(5000);
+          const z = THREE.Math.randFloatSpread(5000);
+          
+          tab.push(x, y, z);
+          col.push(randx, 0, randz);
+        }
+        console.log("b attrib pos", geometry.getAttribute('position'))
+        console.log("b attrib col", geometry.getAttribute('color'))
+        geometry.removeAttribute('position');
+        geometry.removeAttribute('color');
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(tab, 3));
+        geometry.setAttribute('color', new THREE.Uint8BufferAttribute(col, 3));        
+        setVertices(tab);
+        setColors(col);
+        console.log("a attrib pos", geometry.getAttribute('position'))
+        console.log("a attrib col", geometry.getAttribute('color'))
+        console.log("END")
+  }
+};
 
-      {/* <pointsMaterial size={100} /> */}
-    </points>
-  )
+// useEffect(() => {
+//   if (vertices) {
+//     console.log("What is that ?" + '\n', vertices)
+//     console.log("and this ?" + '\n', colors)
+//   }
+// }, [vertices, colors])
+document.body.addEventListener('keyup', handleKeyUp);
+
+return (
+  <points
+    geometry={geometry}
+    material={material}
+  >
+    <bufferGeometry>
+      <a.bufferAttribute
+        attachObject={['attributes', 'position']}
+        count={geometry.getAttribute('position').array.length}
+        // this renders the dots fine
+        // array={new Float32Array(vertices)}
+        array={new Float32Array(geometry.getAttribute('position').array)}
+        // but I can't get the interpolated values to work
+        // might be because bufferAttribute must accept a typed array?
+        // array={new Float32Array(factor)}
+        itemSize={3}
+        onUpdate={self => {
+          self.needsUpdate = true
+          self.verticesNeedUpdate = true
+        }}
+      />
+      <a.bufferAttribute
+        attachObject={['attributes', 'color']}
+        count={geometry.getAttribute('color').array.length}
+        // this renders the dots fine
+        // array={new Uint8Array(colors)}
+        array={new Uint8Array(geometry.getAttribute('color').array)}
+        // but I can't get the interpolated values to work
+        // might be because bufferAttribute must accept a typed array?
+        // array={new Float32Array(factor)}
+        itemSize={3}
+        onUpdate={self => {
+          self.needsUpdate = true
+          self.verticesNeedUpdate = true
+        }}
+      />
+    </bufferGeometry>
+
+    {/* <pointsMaterial size={100} /> */}
+  </points>
+)
 }
 
 class App extends Component {
