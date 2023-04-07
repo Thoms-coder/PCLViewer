@@ -40,26 +40,28 @@ function randColor() {
 function Dots() {
 
   const geometry = new THREE.BufferGeometry();
-  const points = 100000;
+  const points = 10000;
   // const points = THREE.Math.randInt(0, 100000);
   const [number, setNumber] = useState(0);
 
   let tab = [];
   let col = [];
-  // let randx = THREE.Math.randInt(0, 1);
-  // let randy = THREE.Math.randInt(0, 1);
-  // let randz = THREE.Math.randInt(0, 1);
-  let randx = 0;
-  let randy = 0;
-  let randz = 0;
+  // let randx = 0;
+  // let randy = 0;
+  // let randz = 0;
   for (let i = 0; i < points; i++) {
-
+    
     //vertices
     const x = THREE.Math.randFloatSpread(points);
     const y = THREE.Math.randFloatSpread(points);
     const z = THREE.Math.randFloatSpread(points);
-
+    
     tab.push(x, y, z);
+
+    let randx = THREE.Math.randInt(0, 1);
+    let randy = THREE.Math.randInt(0, 1);
+    let randz = THREE.Math.randInt(0, 1);
+
     col.push(randx, randy, randz);
   }
   console.log("b attrib pos", geometry.getAttribute('position'))
