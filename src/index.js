@@ -25,6 +25,27 @@ function OrbitControlsComponent() {
   return <orbitControls ref={ref} args={[camera]} enableDamping dampingFactor={0.1} rotateSpeed={1} />
 }
 
+function randColor() {
+  let color;
+  const getRgb = () => Math.floor(Math.random() * 256);
+
+  const rgbToHex = (r, g, b) =>
+    '#' +
+    [r, g, b]
+      .map(x => {
+        const hex = x.toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+      })
+      .join('');
+
+  color = {
+    r: getRgb(),
+    g: getRgb(),
+    b: getRgb(),
+  };
+  return (rgbToHex(color.r, color.g, color.b));
+}
+
 function Dots() {
 
   const geometry = new THREE.BufferGeometry();
@@ -39,8 +60,8 @@ function Dots() {
   // const scene = new THREE.Scene();
 
   // const [number, setNumber] = useState(0);
-  const [vertices, setVertices] = useState([]);
-  const [colors, setColors] = useState([]);
+  const vertices = useRef([]);
+  const colors = useRef([]);
   const sizes = [];
   const scene = new THREE.Scene();
   // const renderer = new THREE.WebGLRenderer();
@@ -70,14 +91,13 @@ function Dots() {
   // }
   // // console.log("WOOW! ", vertices);
   // // console.log("WAAW! ", colors);
-  console.log("wat ?", geometry);
-  geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-  geometry.setAttribute('color', new THREE.Uint8BufferAttribute(colors, 3));
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices.current, 3));
+  geometry.setAttribute('color', new THREE.Uint8BufferAttribute(colors.current, 3));
   // geometry.computeBoundingBox();
 
   const material = new THREE.PointsMaterial({ size: 10, vertexColors: true, toneMapped: false });
 
-  // const points = new THREE.Points(geometry, material);
+  const points = new THREE.Points(geometry, material);
   // scene.add(points);
 
   // itemSize = 3 because there are 3 values (components) per vertex
@@ -101,84 +121,86 @@ function Dots() {
     if (e.key === "Enter") {
       // console.log("NUUUMBEEERRRR!!!!!!!!!!!",number);
       // setNumber(number + 1);
-      let tab =[];
-      let col =[];
+      let tab = [];
+      let col = [];
       let randx = THREE.Math.randInt(0, 1);
       let randy = THREE.Math.randInt(0, 1);
       let randz = THREE.Math.randInt(0, 1);
-        for(let i = 0; i< 5000; i++) {
-          
-          //vertices
-          const x = THREE.Math.randFloatSpread(5000);
-          const y = THREE.Math.randFloatSpread(5000);
-          const z = THREE.Math.randFloatSpread(5000);
-          
-          tab.push(x, y, z);
-          col.push(randx, 0, randz);
-        }
-        console.log("b attrib pos", geometry.getAttribute('position'))
-        console.log("b attrib col", geometry.getAttribute('color'))
-        geometry.removeAttribute('position');
-        geometry.removeAttribute('color');
-        geometry.setAttribute('position', new THREE.Float32BufferAttribute(tab, 3));
-        geometry.setAttribute('color', new THREE.Uint8BufferAttribute(col, 3));        
-        setVertices(tab);
-        setColors(col);
-        console.log("a attrib pos", geometry.getAttribute('position'))
-        console.log("a attrib col", geometry.getAttribute('color'))
-        console.log("END")
-  }
-};
+      for (let i = 0; i < 5000; i++) {
 
-// useEffect(() => {
-//   if (vertices) {
-//     console.log("What is that ?" + '\n', vertices)
-//     console.log("and this ?" + '\n', colors)
-//   }
-// }, [vertices, colors])
-document.body.addEventListener('keyup', handleKeyUp);
+        //vertices
+        const x = THREE.Math.randFloatSpread(5000);
+        const y = THREE.Math.randFloatSpread(5000);
+        const z = THREE.Math.randFloatSpread(5000);
 
-return (
-  <points
-    geometry={geometry}
-    material={material}
-  >
-    <bufferGeometry>
-      <a.bufferAttribute
-        attachObject={['attributes', 'position']}
-        count={geometry.getAttribute('position').array.length}
-        // this renders the dots fine
-        // array={new Float32Array(vertices)}
-        array={new Float32Array(geometry.getAttribute('position').array)}
-        // but I can't get the interpolated values to work
-        // might be because bufferAttribute must accept a typed array?
-        // array={new Float32Array(factor)}
-        itemSize={3}
-        onUpdate={self => {
-          self.needsUpdate = true
-          self.verticesNeedUpdate = true
-        }}
-      />
-      <a.bufferAttribute
-        attachObject={['attributes', 'color']}
-        count={geometry.getAttribute('color').array.length}
-        // this renders the dots fine
-        // array={new Uint8Array(colors)}
-        array={new Uint8Array(geometry.getAttribute('color').array)}
-        // but I can't get the interpolated values to work
-        // might be because bufferAttribute must accept a typed array?
-        // array={new Float32Array(factor)}
-        itemSize={3}
-        onUpdate={self => {
-          self.needsUpdate = true
-          self.verticesNeedUpdate = true
-        }}
-      />
-    </bufferGeometry>
+        tab.push(x, y, z);
+        col.push(randx, randy, randz);
+      }
+      console.log("b attrib pos", geometry.getAttribute('position'))
+      console.log("b attrib col", geometry.getAttribute('color'))
+      geometry.removeAttribute('position');
+      geometry.removeAttribute('color');
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute(tab, 3));
+      geometry.setAttribute('color', new THREE.Uint8BufferAttribute(col, 3));
+      vertices.current = tab;
+      colors.current = col;
+      console.log("a attrib pos", geometry.getAttribute('position'))
+      console.log("a attrib col", geometry.getAttribute('color'))
+      console.log("END")
+      // setNumber(number + 1);
+      // console.log("number render", number); 
+    }
+  };
 
-    {/* <pointsMaterial size={100} /> */}
-  </points>
-)
+  // useEffect(() => {
+  //   if (vertices) {
+  //     console.log("What is that ?" + '\n', vertices)
+  //     console.log("and this ?" + '\n', colors)
+  //   }
+  // }, [vertices, colors])
+  document.body.addEventListener('keyup', handleKeyUp);
+
+  return (
+    <points
+      geometry={geometry}
+      material={material}
+    >
+      <bufferGeometry>
+        <a.bufferAttribute
+          attachObject={['attributes', 'position']}
+          count={geometry.getAttribute('position').array.length}
+          // this renders the dots fine
+          // array={new Float32Array(vertices)}
+          array={new Float32Array(geometry.getAttribute('position').array)}
+          // but I can't get the interpolated values to work
+          // might be because bufferAttribute must accept a typed array?
+          // array={new Float32Array(factor)}
+          itemSize={3}
+          onUpdate={self => {
+            self.needsUpdate = true
+            self.verticesNeedUpdate = true
+          }}
+        />
+        <a.bufferAttribute
+          attachObject={['attributes', 'color']}
+          count={geometry.getAttribute('color').array.length}
+          // this renders the dots fine
+          // array={new Uint8Array(colors)}
+          array={new Uint8Array(geometry.getAttribute('color').array)}
+          // but I can't get the interpolated values to work
+          // might be because bufferAttribute must accept a typed array?
+          // array={new Float32Array(factor)}
+          itemSize={3}
+          onUpdate={self => {
+            self.needsUpdate = true
+            self.verticesNeedUpdate = true
+          }}
+        />
+      </bufferGeometry>
+
+      {/* <pointsMaterial size={100} /> */}
+    </points>
+  )
 }
 
 class App extends Component {
@@ -205,6 +227,7 @@ class App extends Component {
     return (
       <>
         <Canvas
+          style={{ backgroundColor: "grey" }}
           ref={this.ref}
           camera={{
             fov: 75,
@@ -221,7 +244,7 @@ class App extends Component {
           <OrbitControlsComponent />
 
           <Dots />
-        </Canvas>
+        </Canvas >
         {/* 
         <DatGui data={data} onUpdate={this.handleUpdate} className="react-dat-gui-relative-position">
           <DatNumber path="dotSize" label="dotSize" min={0.1} max={3} step={0.01} />
